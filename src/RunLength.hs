@@ -13,6 +13,7 @@ module RunLength
   )
   where
 
+import Data.List
 
 -- |
 --
@@ -25,7 +26,13 @@ decode
   :: [(Int, a)]
   -> [a]
 decode =
-  undefined
+  foldl tupAppend []
+
+tupAppend :: [a] -> (Int, a) -> [a]
+tupAppend as tup = as ++ tupExpand tup
+
+tupExpand :: (Int, a) -> [a]
+tupExpand (num, val) = take num $ repeat val
 
 
 -- |
@@ -39,5 +46,12 @@ encode
   :: Eq a
   => [a]
   -> [(Int, a)]
-encode =
-  undefined
+encode as = foldl appendTup [] $ group as
+
+appendTup :: Eq a => [(Int, a)] -> [a] -> [(Int, a)]
+appendTup acc []   = acc
+appendTup acc next = acc ++ [nextTup next]
+
+nextTup :: Eq a => [a] -> (Int, a)
+nextTup as = (length (takeWhile (== val) as), val)
+               where val = head as
